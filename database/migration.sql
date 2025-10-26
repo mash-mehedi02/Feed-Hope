@@ -116,3 +116,4 @@ WHERE `status` IS NULL OR `status` = '';
 -- Show completion message
 SELECT 'Database migration completed successfully!' as message;
 
+

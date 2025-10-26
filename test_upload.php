@@ -278,3 +278,4 @@ if ($_POST && isset($_FILES['test_image'])) {
 </body>
 </html>
 
+

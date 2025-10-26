@@ -44,3 +44,4 @@ CREATE TABLE `delivery_tracking` (
 -- mkdir('uploads/food_images');
 -- mkdir('uploads/food_images/thumbs');
 
+

@@ -124,3 +124,4 @@ If you're still having issues:
 3. **Check antivirus software** (may block ports)
 4. **Try different ports** (8080 for Apache, 3307 for MySQL)
 
+
