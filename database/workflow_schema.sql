@@ -71,3 +71,4 @@ CREATE INDEX `idx_food_date` ON `food_donations` (`date`);
 SELECT 'Food donation workflow database setup completed successfully!' as message;
 
 
+

@@ -125,3 +125,4 @@ If you're still having issues:
 4. **Try different ports** (8080 for Apache, 3307 for MySQL)
 
 
+

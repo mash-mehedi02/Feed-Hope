@@ -53,5 +53,5 @@
 
 <h2>view project :</h2>
 
-<a href="#" > view demo</a>
+<a href="" > view demo</a>
 
