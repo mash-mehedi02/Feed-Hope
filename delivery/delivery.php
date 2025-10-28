@@ -1,229 +1,336 @@
 <?php
-ob_start(); 
-// $connection = mysqli_connect("localhost:3307", "root", "");
-// $db = mysqli_select_db($connection, 'demo');
-include("connect.php"); 
+ob_start();
+include("connect.php");
 include '../connection.php';
-if($_SESSION['name']==''){
-	header("location:deliverylogin.php");
+
+if ($_SESSION['name'] == '') {
+    header("location:deliverylogin.php");
 }
-$name=$_SESSION['name'];
-$city=$_SESSION['city'];
-$ch=curl_init();
-curl_setopt($ch,CURLOPT_URL,"http://ip-api.com/json");
-curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-$result=curl_exec($ch);
-$result=json_decode($result);
-// $city= $result->city;
-// echo $city;
 
-$id=$_SESSION['Did'];
+$name = $_SESSION['name'];
+$city = $_SESSION['city'];
+$id = $_SESSION['Did'];
 
+// Accept order logic (unchanged)
+if (isset($_POST['accept_order'])) {
+    $order_id = intval($_POST['order_id']);
+    $check_order = mysqli_query($connection, "SELECT status, assigned_to FROM food_donations WHERE Fid = $order_id");
+    $order_data = mysqli_fetch_assoc($check_order);
 
+    if ($order_data && $order_data['status'] == 'available' && ($order_data['assigned_to'] == NULL || $order_data['assigned_to'] == '')) {
+        $assign_query = "UPDATE food_donations SET status = 'assigned', assigned_to = $id, delivery_by = $id WHERE Fid = $order_id AND assigned_to IS NULL";
+        $result = mysqli_query($connection, $assign_query);
 
+        if (mysqli_affected_rows($connection) > 0) {
+            $order_info = mysqli_query($connection, "SELECT * FROM food_donations WHERE Fid = $order_id");
+            $order = mysqli_fetch_assoc($order_info);
+            $notif_query = "INSERT INTO notifications (user_email, donation_id, type, message)
+                            VALUES ('{$order['email']}', $order_id, 'assigned',
+                            'Your food order \"{$order['food']}\" has been accepted by delivery man: $name')";
+            mysqli_query($connection, $notif_query);
+
+            echo '<script>alert("Order accepted successfully! Check My Orders.");</script>';
+            echo '<script>window.location.href = "delivery_profile.php";</script>';
+            exit;
+        } else {
+            echo '<script>alert("Sorry, this order has already been taken by another delivery person.");</script>';
+        }
+    } else {
+        echo '<script>alert("Sorry, this order is no longer available.");</script>';
+    }
+}
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script language="JavaScript" src="http://www.geoplugin.net/javascript.gp" type="text/javascript"></script>
-    <link rel="stylesheet" href="../home.css">
-
-    <link rel="stylesheet" href="delivery.css">
-</head>
-<body>
-<header>
-        <div class="logo">Food <b style="color: #06C167;">Donate</b></div>
-        <div class="hamburger">
-            <div class="line"></div>
-            <div class="line"></div>
-            <div class="line"></div>
-        </div>
-        <nav class="nav-bar">
-            <ul>
-                <li><a href="#home" class="active">Home</a></li>
-                <li><a href="openmap.php" >map</a></li>
-                <li><a href="deliverymyord.php" >myorders</a></li>
-                <!-- <li ><a href="../logout.php"  >Logout</a></li> -->
-            </ul>
-        </nav>
-    </header>
-    <br>
-    <script>
-        hamburger=document.querySelector(".hamburger");
-        hamburger.onclick =function(){
-            navBar=document.querySelector(".nav-bar");
-            navBar.classList.toggle("active");
-        }
-    </script>
-<?php
-
-// echo var_export(unserialize(file_get_contents('http://www.geoplugin.net/php.gp?ip=103.113.190.19')));
-// echo "Your city: {$city}\n";
-
-// $city = "<script language=javascript> document.write(geoplugin_city());</script>"; 
-// $scity=$city;
-?>
+    <title>FeedHope Delivery Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        .itm{
-            background-color: white;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 250px;
+            background: #06C167;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+        }
+
+        .sidebar .logo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 15px 30px;
+            transition: 0.3s;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .sidebar ul li:hover, .sidebar ul li.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .topbar .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .topbar .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #06C167;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        /* ===== ORDER CARDS ===== */
+        .orders-container {
+            margin-top: 30px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #06C167;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .status-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .order-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .order-info {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+            color: #374151;
         }
-        .itm img{
-            width: 400px;
-            height: 400px;
-            margin-left: auto;
-            margin-right: auto;
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
         }
-        p{
-            text-align: center; font-size: 30PX;color: black; margin-top: 50px;
+
+        .info-row i {
+            color: #06C167;
         }
-        a{
-            /* text-decoration: underline; */
+
+        .accept-btn {
+            background: linear-gradient(135deg, #06C167, #059669);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        @media (max-width: 767px) {
-            .itm{
-                /* float: left; */
-                
+
+        .accept-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 193, 103, 0.3);
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 80px 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+            color: #6b7280;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
             }
-            .itm img{
-                width: 350px;
-                height: 350px;
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
-         <h2><center>Welcome <?php echo"$name";?></center></h2>
+</head>
+<body>
 
-        <div class="itm" >
-
-            <img src="../img/delivery.gif" alt="" width="400" height="400"> 
-          
-        </div>
-        <!-- <h2><center>your Location : <?php echo"$city" ?></center></h2> -->
-        <div class="get">
-            <?php
-
-
-// Define the SQL query to fetch unassigned orders
-$sql = "SELECT fd.Fid AS Fid,fd.location as cure, fd.name,fd.phoneno,fd.date,fd.delivery_by, fd.address as From_address, 
-ad.name AS delivery_person_name, ad.address AS To_address
-FROM food_donations fd
-LEFT JOIN admin ad ON fd.assigned_to = ad.Aid where assigned_to IS NOT NULL and   delivery_by IS NULL and fd.location='$city';
-";
-
-// Execute the query
-$result=mysqli_query($connection, $sql);
-
-
-
-// Check for errors
-if (!$result) {
-    die("Error executing query: " . mysqli_error($conn));
-}
-
-// Fetch the data as an associative array
-$data = array();
-while ($row = mysqli_fetch_assoc($result)) {
-    $data[] = $row;
-}
-
-// If the delivery person has taken an order, update the assigned_to field in the database
-if (isset($_POST['food']) && isset($_POST['delivery_person_id'])) {
-    $order_id = $_POST['order_id'];
-    $delivery_person_id = $_POST['delivery_person_id'];
-    $sql = "SELECT * FROM food_donations WHERE Fid = $order_id AND delivery_by IS NOT NULL";
-    $result = mysqli_query($connection, $sql);
-
-    if (mysqli_num_rows($result) > 0) {
-        // Order has already been assigned to someone else
-        die("Sorry, this order has already been assigned to someone else.");
-    }
-
-
-    $sql = "UPDATE food_donations SET delivery_by = $delivery_person_id WHERE Fid = $order_id";
-    // $result = mysqli_query($conn, $sql);
-    $result=mysqli_query($connection, $sql);
-
-
-    if (!$result) {
-        die("Error assigning order: " . mysqli_error($conn));
-    }
-
-    // Reload the page to prevent duplicate assignments
-    header('Location: ' . $_SERVER['REQUEST_URI']);
-    // exit;
-    ob_end_flush();
-}
-// mysqli_close($conn);
-
-
-?>
-<div class="log">
-<!-- <button type="submit" name="food" onclick="">My orders</button> -->
-<a href="deliverymyord.php">My orders</a>
-
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+    <div>
+        <div class="logo">Feed <b style="color: #fff;">Hope</b></div>
+        <ul>
+            <li class="active"><a href="delivery.php"><i class="fas fa-box"></i> Available Orders</a></li>
+            <li><a href="delivery_profile.php"><i class="fas fa-user"></i> My Profile</a></li>
+            <li><a href="deliverymyord.php"><i class="fas fa-list"></i> My Orders</a></li>
+            <li><a href="openmap.php"><i class="fas fa-map"></i> Map</a></li>
+        </ul>
+    </div>
+    <div style="text-align:center;">
+        <a href="../logout.php" style="color:#fff;text-decoration:none;font-weight:600;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
 </div>
-  
 
-<!-- Display the orders in an HTML table -->
-<div class="table-container">
-         <!-- <p id="heading">donated</p> -->
-         <div class="table-wrapper">
-        <table class="table">
-        <thead>
-        <tr>
-            <th >Name</th>
-            <!-- <th>food</th> -->
-            <!-- <th>Category</th> -->
-            <th>phoneno</th>
-            <th>date/time</th>
-            <th>Pickup address</th>
-            <th>Delivery Address</th>
-            <th>Action</th>
-         
-          
-           
-        </tr>
-        </thead>
-       <tbody>
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+    <div class="topbar">
+        <div class="title"><i class="fas fa-truck"></i> Delivery Dashboard</div>
+        <div class="profile">
+            <i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($name); ?>
+        </div>
+    </div>
 
-        <?php foreach ($data as $row) { ?>
-        <?php    echo "<tr><td data-label=\"name\">".$row['name']."</td><td data-label=\"phoneno\">".$row['phoneno']."</td><td data-label=\"date\">".$row['date']."</td><td data-label=\"Pickup Address\">".$row['From_address']."</td><td data-label=\"Delivery Address\">".$row['To_address']."</td>";
-?>
-        
-            <!-- <td><?= $row['Fid'] ?></td>
-            <td><?= $row['name'] ?></td>
-            <td><?= $row['address'] ?></td> -->
-            <td data-label="Action" style="margin:auto">
-                <?php if ($row['delivery_by'] == null) { ?>
-                    <form method="post" action=" ">
-                        <input type="hidden" name="order_id" value="<?= $row['Fid'] ?>">
-                        <input type="hidden" name="delivery_person_id" value="<?= $id ?>">
-                        <button type="submit" name="food">Take order</button>
-                    </form>
-                <?php } else if ($row['delivery_by'] == $id) { ?>
-                    Order assigned to you
-                <?php } else { ?>
-                    Order assigned to another delivery person
-                <?php } ?>
-            </td>
-        </tr>
-        <?php } ?>
-    </tbody>
-</table>
+    <div class="orders-container">
+        <h2 style="margin: 25px 0; color:#06C167;"><i class="fas fa-utensils"></i> Available Orders in <?php echo htmlspecialchars($city); ?></h2>
 
+        <?php
+        $sql = "SELECT * FROM food_donations 
+                WHERE status = 'available' 
+                AND (assigned_to IS NULL OR assigned_to = '') 
+                AND location = '$city'
+                ORDER BY date DESC";
+        $result = mysqli_query($connection, $sql);
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+        ?>
+        <div class="order-card">
+            <div class="order-header">
+                <div class="order-title"><i class="fas fa-utensils"></i> <?php echo htmlspecialchars($row['food']); ?></div>
+                <span class="status-badge"><?php echo htmlspecialchars($row['status']); ?></span>
             </div>
 
-        
-     
-        
+            <?php if (!empty($row['food_image'])): ?>
+                <img src="../uploads/food_images/<?php echo htmlspecialchars($row['food_image']); ?>" alt="Food Image" class="order-img">
+            <?php endif; ?>
 
-   <br>
-   <br>
+            <div class="order-info">
+                <div class="info-row"><i class="fas fa-user"></i> <strong>Donor:</strong> <?php echo htmlspecialchars($row['name']); ?></div>
+                <div class="info-row"><i class="fas fa-weight"></i> <strong>Quantity:</strong> <?php echo htmlspecialchars($row['quantity']); ?></div>
+                <div class="info-row"><i class="fas fa-map-marker-alt"></i> <strong>Pickup:</strong> <?php echo htmlspecialchars($row['address']); ?></div>
+                <div class="info-row"><i class="fas fa-phone"></i> <strong>Contact:</strong> <?php echo htmlspecialchars($row['phoneno']); ?></div>
+                <div class="info-row"><i class="fas fa-tag"></i> <strong>Type:</strong> <?php echo htmlspecialchars($row['type']); ?></div>
+                <div class="info-row"><i class="fas fa-calendar"></i> <strong>Date:</strong> <?php echo date('M d, Y H:i', strtotime($row['date'])); ?></div>
+            </div>
+
+            <form method="POST">
+                <input type="hidden" name="order_id" value="<?php echo $row['Fid']; ?>">
+                <button type="submit" name="accept_order" class="accept-btn"><i class="fas fa-check-circle"></i> Accept Order</button>
+            </form>
+        </div>
+        <?php
+            }
+        } else {
+            echo '<div class="no-orders"><i class="fas fa-inbox" style="font-size:60px;color:#d1d5db;"></i><br>No available orders yet.</div>';
+        }
+        ?>
+    </div>
+</div>
+
 </body>
 </html>

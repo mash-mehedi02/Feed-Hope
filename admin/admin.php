@@ -58,6 +58,10 @@ if($_SESSION['name']==''){
                     <i class="uil uil-heart"></i>
                     <span class="link-name">Donates</span>
                 </a></li>
+                <li><a href="food_approval.php">
+                    <i class="uil uil-check-circle"></i>
+                    <span class="link-name">Food Approval</span>
+                </a></li>
                 <li><a href="feedback.php">
                     <i class="uil uil-comments"></i>
                     <span class="link-name">Feedbacks</span>
