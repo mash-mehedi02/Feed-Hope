@@ -1,0 +1,37 @@
+/**
+ * Firebase Storage Security Rules
+ * FeedHope - File Upload Rules
+ */
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Food images
+    match /food_images/{imageId} {
+      // Anyone authenticated can read
+      allow read: if isAuthenticated();
+      // Only authenticated users can upload (size limit enforced client-side)
+      allow write: if isAuthenticated() 
+                   && request.resource.size < 3 * 1024 * 1024 // 3MB limit
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // Avatar images
+    match /avatars/{userId}/{imageId} {
+      // Anyone authenticated can read
+      allow read: if isAuthenticated();
+      // Users can only upload their own avatar
+      allow write: if isAuthenticated() 
+                   && userId == request.auth.uid
+                   && request.resource.size < 3 * 1024 * 1024 // 3MB limit
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
+

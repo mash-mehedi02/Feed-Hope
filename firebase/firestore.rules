@@ -1,0 +1,117 @@
+/**
+ * Firestore Security Rules
+ * FeedHope - Database Rules
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isDonor() {
+      return isAuthenticated() && getUserData().role == 'donor';
+    }
+    
+    function isVolunteer() {
+      return isAuthenticated() && getUserData().role == 'volunteer';
+    }
+    
+    function isDelivery() {
+      return isAuthenticated() && getUserData().role == 'delivery';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if isOwner(userId);
+      // Users can create their own document during registration
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Users can update their own data
+      allow update: if isOwner(userId);
+    }
+    
+    // Profiles collections
+    match /donors/{donorId} {
+      allow read: if isAuthenticated();
+      allow create: if isDonor() && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    match /volunteers/{volunteerId} {
+      allow read: if isAuthenticated();
+      allow create: if isVolunteer() && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    match /delivery_persons/{deliveryId} {
+      allow read: if isAuthenticated();
+      allow create: if isDelivery() && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+    
+    // Food donations collection
+    match /food_donations/{donationId} {
+      // Anyone authenticated can read
+      allow read: if isAuthenticated();
+      // Only donors can create
+      allow create: if isDonor() && request.resource.data.donorId == getUserData().profileId;
+      // Update rules based on status workflow
+      allow update: if isAuthenticated() && (
+        // Donor can update their own donations if status is 'available'
+        (isDonor() && resource.data.donorId == getUserData().profileId && resource.data.status == 'available') ||
+        // Volunteer can accept (status: available -> pending)
+        (isVolunteer() && resource.data.status == 'available' && request.resource.data.status == 'pending' && request.resource.data.volunteerId == getUserData().profileId) ||
+        // Delivery can accept (status: pending -> ongoing)
+        (isDelivery() && resource.data.status == 'pending' && request.resource.data.status == 'ongoing' && request.resource.data.deliveryPersonId == getUserData().profileId) ||
+        // Delivery can mark delivered (status: ongoing -> delivered)
+        (isDelivery() && resource.data.status == 'ongoing' && request.resource.data.status == 'delivered' && resource.data.deliveryPersonId == getUserData().profileId)
+      );
+      // Only donor can delete their own donations
+      allow delete: if isDonor() && resource.data.donorId == getUserData().profileId;
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // System can create notifications
+      allow create: if isAuthenticated();
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Food history collection
+    match /food_history/{historyId} {
+      // Anyone authenticated can read
+      allow read: if isAuthenticated();
+      // Only system can create (via cloud functions)
+      allow create: if false; // Use cloud functions to create history
+      allow update: if false;
+      allow delete: if false;
+    }
+    
+    // Locations collection (read-only for all)
+    match /locations/{locationId} {
+      allow read: if true; // Public read
+      allow create, update, delete: if false; // Admin only via console
+    }
+  }
+}
+

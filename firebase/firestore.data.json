@@ -1,0 +1,50 @@
+{
+  "locations": {
+    "dhaka_mirpur1": {
+      "id": "dhaka_mirpur1",
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "area": "Mirpur 1",
+      "latitude": 23.8075,
+      "longitude": 90.3586,
+      "createdAt": "2025-01-01T00:00:00Z"
+    },
+    "dhaka_mirpur2": {
+      "id": "dhaka_mirpur2",
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "area": "Mirpur 2",
+      "latitude": 23.8068,
+      "longitude": 90.3650,
+      "createdAt": "2025-01-01T00:00:00Z"
+    },
+    "dhaka_dhanmondi": {
+      "id": "dhaka_dhanmondi",
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "area": "Dhanmondi",
+      "latitude": 23.7465,
+      "longitude": 90.3708,
+      "createdAt": "2025-01-01T00:00:00Z"
+    },
+    "dhaka_gulshan1": {
+      "id": "dhaka_gulshan1",
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "area": "Gulshan 1",
+      "latitude": 23.7915,
+      "longitude": 90.4147,
+      "createdAt": "2025-01-01T00:00:00Z"
+    },
+    "dhaka_uttara_sector1": {
+      "id": "dhaka_uttara_sector1",
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "area": "Uttara Sector 1",
+      "latitude": 23.8691,
+      "longitude": 90.3969,
+      "createdAt": "2025-01-01T00:00:00Z"
+    }
+  }
+}
+
