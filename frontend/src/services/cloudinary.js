@@ -40,7 +40,7 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
 
     // Fallback values for production (if Vercel env vars not working)
     // These should match your Vercel environment variables
-    const FALLBACK_CLOUD_NAME = 'd15yejhdh';
+    const FALLBACK_CLOUD_NAME = 'dl5yejhch'; // Fixed: was 'd15yejhdh' (typo)
     const FALLBACK_UPLOAD_PRESET = 'feed_hope';
 
     // Check if we're in production (deployed on Vercel)
