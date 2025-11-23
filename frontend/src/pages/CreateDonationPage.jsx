@@ -135,6 +135,7 @@ const CreateDonationPage = () => {
   const [success, setSuccess] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [focusedField, setFocusedField] = useState(null); // Track focused field for styling
 
   // Load user profile and linked request
   useEffect(() => {
@@ -692,14 +693,29 @@ const CreateDonationPage = () => {
       boxShadow: '0 0 0 4px rgba(6, 193, 103, 0.15)',
       transform: 'translateY(-1px)'
     },
-    select: {
+    getInputStyle: (fieldName, focusedField) => ({
       padding: '12px 16px',
-      border: '2px solid #e5e7eb',
+      border: `2px solid ${focusedField === fieldName ? '#06C167' : '#e5e7eb'}`,
       borderRadius: '12px',
       fontSize: '14px',
       outline: 'none',
       transition: 'all 0.3s ease',
-      background: '#fafafa',
+      background: focusedField === fieldName ? 'white' : '#fafafa',
+      color: '#111827',
+      fontWeight: 500,
+      width: '100%',
+      boxSizing: 'border-box',
+      boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(6, 193, 103, 0.15)' : 'none',
+      transform: focusedField === fieldName ? 'translateY(-1px)' : 'none'
+    }),
+    getSelectStyle: (fieldName, focusedField) => ({
+      padding: '12px 16px',
+      border: `2px solid ${focusedField === fieldName ? '#06C167' : '#e5e7eb'}`,
+      borderRadius: '12px',
+      fontSize: '14px',
+      outline: 'none',
+      transition: 'all 0.3s ease',
+      background: focusedField === fieldName ? 'white' : '#fafafa',
       cursor: 'pointer',
       color: '#111827',
       fontWeight: 500,
@@ -709,8 +725,10 @@ const CreateDonationPage = () => {
       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'right 16px center',
-      paddingRight: '40px'
-    },
+      paddingRight: '40px',
+      boxShadow: focusedField === fieldName ? '0 0 0 4px rgba(6, 193, 103, 0.15)' : 'none',
+      transform: focusedField === fieldName ? 'translateY(-1px)' : 'none'
+    }),
     radioGroup: {
       display: 'flex',
       gap: '12px',
@@ -933,9 +951,9 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="e.g., Rice, Biryani, Burger"
                     required
-                    style={styles.input}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.input}
+                    style={styles.getInputStyle('food', focusedField)}
+                    onFocus={() => setFocusedField('food')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
               </div>
@@ -1044,9 +1062,9 @@ const CreateDonationPage = () => {
                         min="1"
                         max={linkedRequest.remaining || 1}
                         required
-                        style={styles.input}
-                        onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                        onBlur={(e) => e.currentTarget.style = styles.input}
+                        style={styles.getInputStyle('peopleServed', focusedField)}
+                        onFocus={() => setFocusedField('peopleServed')}
+                        onBlur={() => setFocusedField(null)}
                       />
                       {linkedRequest.remaining !== undefined && (
                         <p style={{ marginTop: '8px', fontSize: '13px', color: '#6b7280' }}>
@@ -1062,9 +1080,9 @@ const CreateDonationPage = () => {
                       onChange={handleChange}
                       placeholder="e.g., 50 kg, 100 people"
                       required
-                      style={styles.input}
-                      onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                      onBlur={(e) => e.currentTarget.style = styles.input}
+                      style={styles.getInputStyle('quantity', focusedField)}
+                      onFocus={() => setFocusedField('quantity')}
+                      onBlur={() => setFocusedField(null)}
                     />
                   )}
                 </div>
@@ -1081,9 +1099,9 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="Your full name"
                     required
-                    style={styles.input}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.input}
+                    style={styles.getInputStyle('food', focusedField)}
+                    onFocus={() => setFocusedField('food')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
               </div>
@@ -1101,9 +1119,9 @@ const CreateDonationPage = () => {
                     maxLength={11}
                     pattern="[0-9]{11}"
                     required
-                    style={styles.input}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.input}
+                    style={styles.getInputStyle('food', focusedField)}
+                    onFocus={() => setFocusedField('food')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
               </div>
@@ -1116,9 +1134,9 @@ const CreateDonationPage = () => {
                     name="division"
                     value={formData.division}
                     onChange={handleChange}
-                    style={styles.select}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.select, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.select}
+                    style={styles.getSelectStyle('division', focusedField)}
+                    onFocus={() => setFocusedField('division')}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Select Division</option>
                     {divisions.map((div) => (
@@ -1140,12 +1158,12 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     disabled={!formData.division}
                     style={{
-                      ...styles.select,
+                      ...styles.getSelectStyle('district', focusedField),
                       opacity: !formData.division ? 0.6 : 1,
                       cursor: !formData.division ? 'not-allowed' : 'pointer'
                     }}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.select, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.select}
+                    onFocus={() => setFocusedField('district')}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Select District</option>
                     {districts.map((dist) => (
@@ -1168,12 +1186,12 @@ const CreateDonationPage = () => {
                     disabled={!formData.district}
                     required
                     style={{
-                      ...styles.select,
+                      ...styles.getSelectStyle('area', focusedField),
                       opacity: !formData.district ? 0.6 : 1,
                       cursor: !formData.district ? 'not-allowed' : 'pointer'
                     }}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.select, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.select}
+                    onFocus={() => setFocusedField('area')}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Select Area</option>
                     {areas.map((area) => (
@@ -1196,9 +1214,9 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="Road, Building, Block, etc."
                     required
-                    style={styles.input}
-                    onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                    onBlur={(e) => e.currentTarget.style = styles.input}
+                    style={styles.getInputStyle('food', focusedField)}
+                    onFocus={() => setFocusedField('food')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
               </div>
@@ -1348,12 +1366,12 @@ const CreateDonationPage = () => {
                       placeholder="Any additional information..."
                       rows="2"
                       style={{
-                        ...styles.input,
+                        ...styles.getInputStyle('donorNote', focusedField),
                         resize: 'vertical',
                         minHeight: '60px'
                       }}
-                      onFocus={(e) => e.currentTarget.style = { ...styles.input, ...styles.inputFocus }}
-                      onBlur={(e) => e.currentTarget.style = styles.input}
+                      onFocus={() => setFocusedField('donorNote')}
+                      onBlur={() => setFocusedField(null)}
                     />
                   </div>
                 </div>

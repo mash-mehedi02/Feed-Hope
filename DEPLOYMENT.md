@@ -32,7 +32,15 @@
    VITE_FIREBASE_MESSAGING_SENDER_ID=895269062804
    VITE_FIREBASE_APP_ID=1:895269062804:web:81515392df0318b3ec0c81
    VITE_FIREBASE_MEASUREMENT_ID=G-1VTBMD9Y8L
+   VITE_CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
+   VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
    ```
+   
+   **Note:** For Cloudinary setup:
+   - Sign up at https://cloudinary.com (free tier available)
+   - Get your Cloud Name from dashboard
+   - Create an unsigned upload preset in Settings → Upload → Upload presets
+   - Add both values to Vercel environment variables
 
 5. **Deploy**
    - Click "Deploy"
@@ -108,6 +116,8 @@ const firebaseConfig = {
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 - `VITE_FIREBASE_MEASUREMENT_ID`
+- `VITE_CLOUDINARY_CLOUD_NAME` (Your Cloudinary cloud name)
+- `VITE_CLOUDINARY_UPLOAD_PRESET` (Your Cloudinary upload preset name)
 
 ### 🔧 Firebase Configuration
 
