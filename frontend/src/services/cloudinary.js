@@ -87,20 +87,20 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
       console.log('Using fallback:', { cloudName: finalCloudName, uploadPreset: finalUploadPreset });
     }
 
-    // Create FormData
+    // Create FormData for Cloudinary unsigned upload
     const formData = new FormData();
     formData.append('file', imageFile);
     formData.append('upload_preset', finalUploadPreset);
-    formData.append('folder', folder);
-    formData.append('resource_type', 'image');
     
-    // Optional: Add image transformations for optimization
-    // formData.append('transformation', 'w_800,h_600,c_fill,q_auto,f_auto');
+    // Optional: Add folder if specified
+    if (folder) {
+      formData.append('folder', folder);
+    }
+    
+    // Resource type is image (default, but explicit is better)
+    formData.append('resource_type', 'image');
 
     const uploadUrl = `https://api.cloudinary.com/v1_1/${finalCloudName}/image/upload`;
-    
-    // Update FormData with final values
-    formData.set('upload_preset', finalUploadPreset);
 
     console.log('📤 Uploading to:', uploadUrl);
 
