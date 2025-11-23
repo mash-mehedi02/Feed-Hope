@@ -951,7 +951,7 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="e.g., Rice, Biryani, Burger"
                     required
-                    style={styles.getInputStyle('food', focusedField)}
+                      style={styles.getInputStyle('address', focusedField)}
                     onFocus={() => setFocusedField('food')}
                     onBlur={() => setFocusedField(null)}
                   />
@@ -1215,7 +1215,7 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="Road, Building, Block, etc."
                     required
-                    style={styles.getInputStyle('food', focusedField)}
+                      style={styles.getInputStyle('address', focusedField)}
                     onFocus={() => setFocusedField('food')}
                     onBlur={() => setFocusedField(null)}
                   />
