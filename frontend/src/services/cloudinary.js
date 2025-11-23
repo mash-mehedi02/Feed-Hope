@@ -32,11 +32,22 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
+    // Debug logging
+    console.log('🔍 Cloudinary Environment Variables Check:', {
+      cloudName: cloudName ? '✅ Found' : '❌ Missing',
+      uploadPreset: uploadPreset ? '✅ Found' : '❌ Missing',
+      allEnvKeys: Object.keys(import.meta.env).filter(key => key.includes('CLOUDINARY'))
+    });
+
     if (!cloudName) {
+      console.error('❌ VITE_CLOUDINARY_CLOUD_NAME is missing!');
+      console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary cloud name not configured. Please set VITE_CLOUDINARY_CLOUD_NAME in your .env file.');
     }
 
     if (!uploadPreset) {
+      console.error('❌ VITE_CLOUDINARY_UPLOAD_PRESET is missing!');
+      console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary upload preset not configured. Please set VITE_CLOUDINARY_UPLOAD_PRESET in your .env file.');
     }
 
