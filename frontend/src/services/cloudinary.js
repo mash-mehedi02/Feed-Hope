@@ -90,7 +90,7 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
     // Create FormData
     const formData = new FormData();
     formData.append('file', imageFile);
-    formData.append('upload_preset', uploadPreset);
+    formData.append('upload_preset', finalUploadPreset);
     formData.append('folder', folder);
     formData.append('resource_type', 'image');
     
