@@ -117,43 +117,49 @@ const BANGLADESH_LOCATIONS = {
  */
 export const getDivisions = async () => {
   try {
-    const q = query(
-      collection(db, 'locations'),
-      where('type', '==', 'division'),
-      orderBy('name')
-    );
+    // Try Firestore query first (only if index exists)
+    try {
+      const q = query(
+        collection(db, 'locations'),
+        where('type', '==', 'division'),
+        orderBy('name')
+      );
 
-    const querySnapshot = await getDocs(q);
-    const divisionsSet = new Set();
-    const divisions = [];
+      const querySnapshot = await getDocs(q);
+      const divisionsSet = new Set();
+      const divisions = [];
 
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.type === 'division' && !divisionsSet.has(data.name)) {
-        divisionsSet.add(data.name);
-        divisions.push({
-          id: doc.id,
-          name: data.name
-        });
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.type === 'division' && !divisionsSet.has(data.name)) {
+          divisionsSet.add(data.name);
+          divisions.push({
+            id: doc.id,
+            name: data.name
+          });
+        }
+      });
+
+      // If Firestore has data, use it
+      if (divisions.length > 0) {
+        return {
+          success: true,
+          data: divisions.sort((a, b) => a.name.localeCompare(b.name))
+        };
       }
-    });
-
-    // If Firestore has data, use it; otherwise use hardcoded data
-    if (divisions.length > 0) {
-      return {
-        success: true,
-        data: divisions.sort((a, b) => a.name.localeCompare(b.name))
-      };
-    } else {
-      // Fallback to hardcoded divisions
-      return {
-        success: true,
-        data: BANGLADESH_LOCATIONS.divisions.sort((a, b) => a.name.localeCompare(b.name))
-      };
+    } catch (firestoreError) {
+      // Index missing or other Firestore error - silently fallback
+      // Don't log error as it's expected if index doesn't exist
     }
+
+    // Fallback to hardcoded divisions (always works)
+    return {
+      success: true,
+      data: BANGLADESH_LOCATIONS.divisions.sort((a, b) => a.name.localeCompare(b.name))
+    };
   } catch (error) {
-    console.error('Get divisions error:', error);
-    // Fallback to hardcoded divisions
+    // Final fallback if something unexpected happens
+    console.warn('Unexpected error in getDivisions, using fallback:', error);
     return {
       success: true,
       data: BANGLADESH_LOCATIONS.divisions.sort((a, b) => a.name.localeCompare(b.name))

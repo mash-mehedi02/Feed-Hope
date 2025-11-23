@@ -38,39 +38,44 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
                          import.meta.env.CLOUDINARY_UPLOAD_PRESET ||
                          (typeof window !== 'undefined' && window.ENV?.VITE_CLOUDINARY_UPLOAD_PRESET);
 
+    // Fallback values for production (if Vercel env vars not working)
+    // These should match your Vercel environment variables
+    const FALLBACK_CLOUD_NAME = 'd15yejhdh';
+    const FALLBACK_UPLOAD_PRESET = 'feed_hope';
+
+    // Check if we're in production (deployed on Vercel)
+    const isProduction = import.meta.env.MODE === 'production' || 
+                         (typeof window !== 'undefined' && window.location?.hostname?.includes('vercel.app')) ||
+                         !import.meta.env.DEV;
+
+    // Use fallback if environment variables are missing (for production)
+    // Always use fallback in production if env vars missing (Vercel workaround)
+    const finalCloudName = cloudName || (isProduction ? FALLBACK_CLOUD_NAME : null);
+    const finalUploadPreset = uploadPreset || (isProduction ? FALLBACK_UPLOAD_PRESET : null);
+
     // Debug logging - more detailed
     console.log('🔍 Cloudinary Environment Variables Check:', {
       cloudName: cloudName ? '✅ Found' : '❌ Missing',
       uploadPreset: uploadPreset ? '✅ Found' : '❌ Missing',
       cloudNameValue: cloudName || 'undefined',
       uploadPresetValue: uploadPreset || 'undefined',
+      isProduction: isProduction,
+      usingFallback: !cloudName || !uploadPreset,
+      finalCloudName: finalCloudName,
+      finalUploadPreset: finalUploadPreset,
       allEnvKeys: Object.keys(import.meta.env).filter(key => key.includes('CLOUDINARY') || key.includes('VITE')),
       allEnvKeysCount: Object.keys(import.meta.env).length
     });
 
-    // Fallback values for production (if Vercel env vars not working)
-    // These should match your Vercel environment variables
-    const FALLBACK_CLOUD_NAME = 'd15yejhdh';
-    const FALLBACK_UPLOAD_PRESET = 'feed_hope';
-
-    // Use fallback if environment variables are missing (for production)
-    const finalCloudName = cloudName || FALLBACK_CLOUD_NAME;
-    const finalUploadPreset = uploadPreset || FALLBACK_UPLOAD_PRESET;
-
-    // Check if we're in production (deployed on Vercel)
-    const isProduction = import.meta.env.MODE === 'production' || 
-                         (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) ||
-                         !import.meta.env.DEV;
-
-    // In production, use fallback if env vars missing (Vercel env var issue workaround)
     // In development, throw error to catch configuration issues early
-    if (!cloudName && !isProduction) {
+    // In production, use fallback values (Vercel env var issue workaround)
+    if (!finalCloudName && !isProduction) {
       console.error('❌ VITE_CLOUDINARY_CLOUD_NAME is missing!');
       console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary cloud name not configured. Please set VITE_CLOUDINARY_CLOUD_NAME in your .env file.');
     }
 
-    if (!uploadPreset && !isProduction) {
+    if (!finalUploadPreset && !isProduction) {
       console.error('❌ VITE_CLOUDINARY_UPLOAD_PRESET is missing!');
       console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary upload preset not configured. Please set VITE_CLOUDINARY_UPLOAD_PRESET in your .env file.');
