@@ -104,6 +104,14 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
 
     console.log('📤 Uploading to:', uploadUrl);
 
+    console.log('📤 Uploading to Cloudinary:', {
+      url: uploadUrl,
+      cloudName: finalCloudName,
+      uploadPreset: finalUploadPreset,
+      fileName: imageFile.name,
+      fileSize: imageFile.size
+    });
+
     const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData
@@ -111,7 +119,22 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `Upload failed: ${response.statusText}`);
+      console.error('❌ Cloudinary API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      
+      // More detailed error message
+      let errorMessage = errorData.error?.message || `Upload failed: ${response.statusText}`;
+      
+      if (response.status === 401) {
+        errorMessage = `Unauthorized (401): Check if upload preset '${finalUploadPreset}' exists and is set to 'Unsigned' mode in Cloudinary dashboard.`;
+      } else if (response.status === 404) {
+        errorMessage = `Not Found (404): Cloud name '${finalCloudName}' or upload preset '${finalUploadPreset}' not found.`;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
