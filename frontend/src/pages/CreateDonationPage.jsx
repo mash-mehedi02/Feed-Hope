@@ -1216,7 +1216,7 @@ const CreateDonationPage = () => {
                     placeholder="Road, Building, Block, etc."
                     required
                       style={styles.getInputStyle('address', focusedField)}
-                    onFocus={() => setFocusedField('food')}
+                    onFocus={() => setFocusedField('address')}
                     onBlur={() => setFocusedField(null)}
                   />
                 </div>
