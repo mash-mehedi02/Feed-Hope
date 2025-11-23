@@ -57,11 +57,13 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
     const finalCloudName = cloudName || FALLBACK_CLOUD_NAME;
     const finalUploadPreset = uploadPreset || FALLBACK_UPLOAD_PRESET;
 
-    // Only use fallback in production (when deployed)
+    // Check if we're in production (deployed on Vercel)
     const isProduction = import.meta.env.MODE === 'production' || 
-                         window.location.hostname.includes('vercel.app') ||
+                         (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) ||
                          !import.meta.env.DEV;
 
+    // In production, use fallback if env vars missing (Vercel env var issue workaround)
+    // In development, throw error to catch configuration issues early
     if (!cloudName && !isProduction) {
       console.error('❌ VITE_CLOUDINARY_CLOUD_NAME is missing!');
       console.error('Available env keys:', Object.keys(import.meta.env));
@@ -74,10 +76,10 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
       throw new Error('Cloudinary upload preset not configured. Please set VITE_CLOUDINARY_UPLOAD_PRESET in your .env file.');
     }
 
-    // Log if using fallback
-    if (!cloudName || !uploadPreset) {
+    // Log if using fallback (production only)
+    if ((!cloudName || !uploadPreset) && isProduction) {
       console.warn('⚠️ Using fallback Cloudinary values (env vars not found in build)');
-      console.log('Using:', { cloudName: finalCloudName, uploadPreset: finalUploadPreset });
+      console.log('Using fallback:', { cloudName: finalCloudName, uploadPreset: finalUploadPreset });
     }
 
     // Create FormData
