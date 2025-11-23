@@ -29,26 +29,55 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
     console.log('📸 Uploading image to Cloudinary:', imageFile.name, imageFile.size, 'bytes');
 
     // Get Cloudinary cloud name and upload preset from environment variables
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+    // Try multiple ways to get the values (Vercel sometimes has issues)
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 
+                      import.meta.env.CLOUDINARY_CLOUD_NAME ||
+                      (typeof window !== 'undefined' && window.ENV?.VITE_CLOUDINARY_CLOUD_NAME);
+    
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 
+                         import.meta.env.CLOUDINARY_UPLOAD_PRESET ||
+                         (typeof window !== 'undefined' && window.ENV?.VITE_CLOUDINARY_UPLOAD_PRESET);
 
-    // Debug logging
+    // Debug logging - more detailed
     console.log('🔍 Cloudinary Environment Variables Check:', {
       cloudName: cloudName ? '✅ Found' : '❌ Missing',
       uploadPreset: uploadPreset ? '✅ Found' : '❌ Missing',
-      allEnvKeys: Object.keys(import.meta.env).filter(key => key.includes('CLOUDINARY'))
+      cloudNameValue: cloudName || 'undefined',
+      uploadPresetValue: uploadPreset || 'undefined',
+      allEnvKeys: Object.keys(import.meta.env).filter(key => key.includes('CLOUDINARY') || key.includes('VITE')),
+      allEnvKeysCount: Object.keys(import.meta.env).length
     });
 
-    if (!cloudName) {
+    // Fallback values for production (if Vercel env vars not working)
+    // These should match your Vercel environment variables
+    const FALLBACK_CLOUD_NAME = 'd15yejhdh';
+    const FALLBACK_UPLOAD_PRESET = 'feed_hope';
+
+    // Use fallback if environment variables are missing (for production)
+    const finalCloudName = cloudName || FALLBACK_CLOUD_NAME;
+    const finalUploadPreset = uploadPreset || FALLBACK_UPLOAD_PRESET;
+
+    // Only use fallback in production (when deployed)
+    const isProduction = import.meta.env.MODE === 'production' || 
+                         window.location.hostname.includes('vercel.app') ||
+                         !import.meta.env.DEV;
+
+    if (!cloudName && !isProduction) {
       console.error('❌ VITE_CLOUDINARY_CLOUD_NAME is missing!');
       console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary cloud name not configured. Please set VITE_CLOUDINARY_CLOUD_NAME in your .env file.');
     }
 
-    if (!uploadPreset) {
+    if (!uploadPreset && !isProduction) {
       console.error('❌ VITE_CLOUDINARY_UPLOAD_PRESET is missing!');
       console.error('Available env keys:', Object.keys(import.meta.env));
       throw new Error('Cloudinary upload preset not configured. Please set VITE_CLOUDINARY_UPLOAD_PRESET in your .env file.');
+    }
+
+    // Log if using fallback
+    if (!cloudName || !uploadPreset) {
+      console.warn('⚠️ Using fallback Cloudinary values (env vars not found in build)');
+      console.log('Using:', { cloudName: finalCloudName, uploadPreset: finalUploadPreset });
     }
 
     // Create FormData
@@ -61,7 +90,10 @@ export const uploadImageToCloudinary = async (imageFile, folder = 'feedhope/food
     // Optional: Add image transformations for optimization
     // formData.append('transformation', 'w_800,h_600,c_fill,q_auto,f_auto');
 
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${finalCloudName}/image/upload`;
+    
+    // Update FormData with final values
+    formData.set('upload_preset', finalUploadPreset);
 
     console.log('📤 Uploading to:', uploadUrl);
 
