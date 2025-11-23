@@ -1099,8 +1099,8 @@ const CreateDonationPage = () => {
                     onChange={handleChange}
                     placeholder="Your full name"
                     required
-                    style={styles.getInputStyle('food', focusedField)}
-                    onFocus={() => setFocusedField('food')}
+                    style={styles.getInputStyle('name', focusedField)}
+                    onFocus={() => setFocusedField('name')}
                     onBlur={() => setFocusedField(null)}
                   />
                 </div>
@@ -1119,9 +1119,10 @@ const CreateDonationPage = () => {
                     maxLength={11}
                     pattern="[0-9]{11}"
                     required
-                    style={styles.getInputStyle('food', focusedField)}
-                    onFocus={() => setFocusedField('food')}
+                    style={styles.getInputStyle('phone', focusedField)}
+                    onFocus={() => setFocusedField('phone')}
                     onBlur={() => setFocusedField(null)}
+                  />
                   />
                 </div>
               </div>
