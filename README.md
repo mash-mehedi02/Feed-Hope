@@ -56,19 +56,29 @@ To create a seamless connection between food donors and those in need, reducing 
 ## 🖼️ Screenshots
 
 ### Dashboard Overview
-![Dashboard Screenshot](img/Screenshot%20(484).png)
+<div align="center">
+  <img src="img/Screenshot%20(484).png" alt="Dashboard Screenshot" width="800" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
 
 ### Donation Interface
-![Donation Screenshot](img/Screenshot%20(485).png)
+<div align="center">
+  <img src="img/Screenshot%20(485).png" alt="Donation Screenshot" width="800" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
 
 ### Map Integration
-![Map Screenshot](img/Screenshot%20(486).png)
+<div align="center">
+  <img src="img/Screenshot%20(486).png" alt="Map Screenshot" width="800" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
 
 ### Profile & History
-![Profile Screenshot](img/Screenshot%20(487).png)
+<div align="center">
+  <img src="img/Screenshot%20(487).png" alt="Profile Screenshot" width="800" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
 
 ### Delivery Tracking
-![Delivery Screenshot](img/Screenshot%20(488).png)
+<div align="center">
+  <img src="img/Screenshot%20(488).png" alt="Delivery Screenshot" width="800" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+</div>
 
 ---
 
